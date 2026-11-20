@@ -1,10 +1,15 @@
 package com.project.code.Model;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public class PurchaseProductDTO {
+    @NotNull(message = "Product ID is required")
     private Long id;
     private String name;
     private Double price;
+    @NotNull(message = "Product quantity is required")
+    @Positive(message = "Product quantity must be greater than zero")
     private Integer quantity;
     private Double total;
 

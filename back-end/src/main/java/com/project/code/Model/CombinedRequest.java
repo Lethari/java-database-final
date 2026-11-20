@@ -1,8 +1,12 @@
 package com.project.code.Model;
 
+import jakarta.validation.Valid;
+
 public class CombinedRequest {
     
+    @Valid
     private Product product;
+    @Valid
     private Inventory inventory;
 
     public Product getProduct() {

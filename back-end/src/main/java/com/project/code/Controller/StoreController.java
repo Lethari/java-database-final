@@ -1,35 +1,76 @@
 package com.project.code.Controller;
 
+import com.project.code.Model.PlaceOrderRequestDTO;
+import com.project.code.Model.Store;
+import com.project.code.Model.StoreResponseDTO;
+import com.project.code.Service.OrderService;
+import com.project.code.Service.ServiceClass;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/store")
 public class StoreController {
-// 1. Set Up the Controller Class:
-//    - Annotate the class with `@RestController` to designate it as a REST controller for handling HTTP requests.
-//    - Map the class to the `/store` URL using `@RequestMapping("/store")`.
 
+    private final ServiceClass service;
+    private final OrderService orderService;
 
- // 2. Autowired Dependencies:
-//    - Inject the following dependencies via `@Autowired`:
-//        - `StoreRepository` for managing store data.
-//        - `OrderService` for handling order-related functionality.
+    public StoreController(ServiceClass service, OrderService orderService) {
+        this.service = service;
+        this.orderService = orderService;
+    }
 
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Map<String, String> addStore(@Valid @RequestBody Store store) {
+        service.saveStore(store);
+        return Map.of("message", "Store created successfully.");
+    }
 
- // 3. Define the `addStore` Method:
-//    - Annotate with `@PostMapping` to create an endpoint for adding a new store.
-//    - Accept `Store` object in the request body.
-//    - Return a success message in a `Map<String, String>` with the key `message` containing store creation confirmation.
+    @GetMapping
+    public Map<String, List<StoreResponseDTO>> listStores() {
+        return Map.of("stores", service.getStores().stream().map(StoreResponseDTO::from).toList());
+    }
 
+    @GetMapping("/{storeId}")
+    public StoreResponseDTO getStore(@PathVariable long storeId) {
+        return StoreResponseDTO.from(service.getStore(storeId));
+    }
 
- // 4. Define the `validateStore` Method:
-//    - Annotate with `@GetMapping("validate/{storeId}")` to check if a store exists by its `storeId`.
-//    - Return a **boolean** indicating if the store exists.
+    @GetMapping("/validate/{storeId}")
+    public boolean validateStore(@PathVariable long storeId) {
+        return service.storeExists(storeId);
+    }
 
+    @PutMapping("/{storeId}")
+    public Map<String, String> updateStore(
+            @PathVariable long storeId,
+            @Valid @RequestBody Store store) {
+        service.updateStore(storeId, store);
+        return Map.of("message", "Store updated successfully.");
+    }
 
- // 5. Define the `placeOrder` Method:
-//    - Annotate with `@PostMapping("/placeOrder")` to handle order placement.
-//    - Accept `PlaceOrderRequestDTO` in the request body.
-//    - Return a success message with key `message` if the order is successfully placed.
-//    - Return an error message with key `Error` if there is an issue processing the order.
+    @DeleteMapping("/{storeId}")
+    public Map<String, String> deleteStore(@PathVariable long storeId) {
+        service.deleteStore(storeId);
+        return Map.of("message", "Store deleted successfully.");
+    }
 
-
-   
+    @PostMapping("/placeOrder")
+    public Map<String, String> placeOrder(@Valid @RequestBody PlaceOrderRequestDTO request) {
+        orderService.saveOrder(request);
+        return Map.of("message", "Order placed successfully.");
+    }
 }

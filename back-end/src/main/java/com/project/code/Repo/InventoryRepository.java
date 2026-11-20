@@ -1,34 +1,43 @@
 package com.project.code.Repo;
 
+import com.project.code.Model.Inventory;
 
-public interface InventoryRepository {
-// 1. Add the repository interface:
-//    - Extend JpaRepository<Inventory, Long> to inherit basic CRUD functionality.
-//    - This allows the repository to perform operations like save, delete, update, and find without having to implement these methods manually.
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.stereotype.Repository;
 
-// Example: public interface InventoryRepository extends JpaRepository<Inventory, Long> {}
+import org.springframework.transaction.annotation.Transactional;
 
-// 2. Add custom query methods:
-//    - **findByProductIdandStoreId**:
-//      - This method will allow you to find an inventory record by its product ID and store ID.
-//      - Return type: Inventory
-//      - Parameters: Long productId, Long storeId
-      
-// Example: public Inventory findByProductIdandStoreId(Long productId, Long storeId);
+import jakarta.persistence.LockModeType;
+import java.util.List;
 
-//    - **findByStore_Id**:
-//      - This method will allow you to find a list of inventory records for a specific store.
-//      - Return type: List<Inventory>
-//      - Parameter: Long storeId
-      
-// Example: public List<Inventory> findByStore_Id(Long storeId);
+@Repository
+public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
-//    - **deleteByProductId**:
-//      - This method will allow you to delete all inventory records related to a specific product ID.
-//      - Return type: void
-//      - Parameter: Long productId
-//      - Use @Modifying and @Transactional annotations to ensure the database is modified correctly.
+    // Find inventory by Product ID and Store ID
+    Inventory findByProduct_IdAndStore_Id(Long productId, Long storeId);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Inventory findForUpdateByProduct_IdAndStore_Id(Long productId, Long storeId);
 
+    // Find all inventory records for a specific Store
+    List<Inventory> findByStore_Id(Long storeId);
+
+    // Delete inventory records associated with a Product ID
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Inventory i WHERE i.product.id = :productId")
+    int deleteByProductId(@Param("productId") Long productId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Inventory i WHERE i.product.id = :productId AND i.store.id = :storeId")
+    int deleteByProductAndStore(
+            @Param("productId") Long productId,
+            @Param("storeId") Long storeId
+    );
 
 }

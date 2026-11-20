@@ -2,14 +2,25 @@ package com.project.code.Model;
 
 
 import java.util.List;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 public class PlaceOrderRequestDTO {
+    @NotNull(message = "Store is required")
     private Long storeId;
+    @NotBlank(message = "Customer name is required")
     private String customerName;
+    @NotBlank(message = "Customer email is required")
+    @Email(message = "Customer email must be valid")
     private String customerEmail;
+    @NotBlank(message = "Customer phone is required")
     private String customerPhone;
     private String datetime;
-    private List<PurchaseProductDTO> purchaseProduct;
+    @NotEmpty(message = "At least one product is required")
+    private List<@Valid PurchaseProductDTO> purchaseProduct;
     private Double totalPrice;
 
     // Getters and Setters
